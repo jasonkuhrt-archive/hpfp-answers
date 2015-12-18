@@ -1,0 +1,3 @@
+# HPFP Answers
+
+Answers to questions in link:http://haskellbook.com[Haskell Programming First Principals].
