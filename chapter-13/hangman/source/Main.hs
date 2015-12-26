@@ -21,10 +21,10 @@ main = undefined
 
 
 
--- Game
+-- Game Logic
 
 randomWerd :: IO Werd
-randomWerd = gameWerdList >>= randomWerdFromList
+randomWerd = gameWerdList >>= randomItem
 
 gameWerdList :: IO WerdList
 gameWerdList = do
@@ -44,12 +44,15 @@ gameMaxWerdLength = 10
 
 
 
--- Working with Word lists
 
-randomWerdFromList :: WerdList -> IO Werd
-randomWerdFromList werdList = do
-  i <- randomItem werdList
-  return (werdList !! i)
+
+
+-- Word List Utilities
+
+-- randomWerdFromList :: WerdList -> IO Werd
+-- randomWerdFromList werdList = do
+--   i <- randomItem werdList
+--   return (werdList !! i)
 
 readWerdList :: IO WerdList
 readWerdList = do
@@ -58,7 +61,19 @@ readWerdList = do
 
 
 
--- Utilities
 
-randomItem :: [a] -> IO Int
-randomItem xs = randomRIO (0, length xs - 1)
+
+
+-- General Utilities
+
+-- TODO: This will throw an exception on empty lists
+randomItem :: [a] -> IO a
+randomItem xs = do
+  index <- randomIndex xs
+  return (xs !! index)
+  -- Also, here is an alternative solution/style. It is more
+  -- concise but requires more understanding from tbe user.
+  -- liftM (xs !!) (randomIndex xs)
+
+randomIndex :: [a] -> IO Int
+randomIndex xs = randomRIO (0, length xs - 1)
