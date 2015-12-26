@@ -66,7 +66,8 @@ readWerdList = do
 
 -- General Utilities
 
--- TODO: This will throw an exception on empty lists
+-- TODO: This will throw an exception on empty lists. Error occurs with `!!`.
+--       `index` will equal -1 which is an invalid index.
 randomItem :: [a] -> IO a
 randomItem xs = do
   index <- randomIndex xs
