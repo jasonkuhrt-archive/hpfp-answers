@@ -5,6 +5,7 @@ import Data.Char (toLower)
 import Data.Maybe (isJust)
 import System.Exit (exitSuccess)
 import System.Random (randomRIO)
+import Data.List
 
 
 
@@ -14,6 +15,15 @@ import System.Random (randomRIO)
 type Werd = String
 type WerdList = [Werd]
 
+data Game = Game Werd [Maybe Char] String
+
+instance Show Game where
+  show (Game werd mask guesses) =
+    intersperse ' ' (stringifyMask mask) ++ " | Letters guessed so far: " ++ stringifyGuesses guesses
+
+
+
+
 
 
 main :: IO ()
@@ -21,7 +31,34 @@ main = undefined
 
 
 
+-- Game Graphics
+
+stringifyMask :: [Maybe Char] -> String
+stringifyMask = fmap stringifyMaskItem
+
+stringifyMaskItem :: Maybe Char -> Char
+stringifyMaskItem Nothing     = '_'
+stringifyMaskItem (Just char) = char
+
+stringifyGuesses :: String -> String
+stringifyGuesses ""     = "(None)"
+stringifyGuesses string = string
+
+
+
 -- Game Logic
+
+freshGame :: Werd -> Game
+freshGame werd = Game werd (fmap (const Nothing) werd) []
+
+isHit :: Game -> Char -> Bool
+isHit (Game werd _ _) char = char `elem` werd
+
+isAlreadyGussed :: Game -> Char -> Bool
+isAlreadyGussed (Game _ _ guesses) char = char `elem` guesses
+
+discoverWerd :: Game -> Char -> Game
+discoverWerd (Game werd mask guesses) char = undefined
 
 randomWerd :: IO Werd
 randomWerd = gameWerdList >>= randomItem
