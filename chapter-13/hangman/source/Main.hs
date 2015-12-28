@@ -51,17 +51,41 @@ stringifyGuesses string = string
 freshGame :: Werd -> Game
 freshGame werd = Game werd (fmap (const Nothing) werd) []
 
+
+
 isHit :: Game -> Char -> Bool
 isHit (Game werd _ _) char = char `elem` werd
+
+
 
 isAlreadyGussed :: Game -> Char -> Bool
 isAlreadyGussed (Game _ _ guesses) char = char `elem` guesses
 
-discoverWerd :: Game -> Char -> Game
-discoverWerd (Game werd mask guesses) char = undefined
+
+
+guessChar :: Game -> Char -> Game
+guessChar (Game werd mask guesses) c =
+  Game werd maskUpdated guessesUpdated
+
+  where
+
+  guessesUpdated =
+    c : guesses
+
+  maskUpdated =
+    zipWith (zipper c) werd mask
+
+  zipper guessedChar werdChar charMask =
+    if guessedChar == werdChar
+    then Just werdChar
+    else charMask
+
+
 
 randomWerd :: IO Werd
 randomWerd = gameWerdList >>= randomItem
+
+
 
 gameWerdList :: IO WerdList
 gameWerdList = do
@@ -72,6 +96,8 @@ gameWerdList = do
     fitsGame werd = let l = length werd
                      in l >= gameMinWerdLength &&
                         l <= gameMaxWerdLength
+
+
 
 gameMinWerdLength :: Int
 gameMinWerdLength = 5
