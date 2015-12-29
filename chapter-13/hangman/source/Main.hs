@@ -1,6 +1,6 @@
 module Main where
 
-import Control.Monad (forever)
+import Control.Monad (forever, when)
 import Data.Char (toLower)
 import Data.Maybe (isJust)
 import System.Exit (exitSuccess)
@@ -27,7 +27,76 @@ instance Show Game where
 
 
 main :: IO ()
-main = undefined
+main = do
+  werd <- randomWerd
+  let game = createGame (fmap toLower werd)
+  runGame game
+
+
+
+-- Game IO
+
+runGame :: Game -> IO ()
+runGame game = forever $ do
+  tryGameLose game
+  tryGameWin game
+  putStrLn (" " ++ show game)
+  putStr "Guess a letter: "
+  guessed <- getLine
+  case guessed of
+    [x] -> handleGuessChar game x >>= runGame
+    _   -> putStrLn "Invalid guess. Your guess must be a single character. Try again."
+
+
+
+tryGameLose :: Game -> IO ()
+tryGameLose game@(Game werd mask guesses) =
+  when (isGameLose game) $ do
+    putStrLn "You lose!"
+    putStrLn ("The word was \"" ++ werd ++ "\".")
+    exitSuccess
+
+tryGameWin :: Game -> IO ()
+tryGameWin game@(Game werd mask guesses) =
+  when (isGameWin game) $ do
+    putStrLn "You win!"
+    exitSuccess
+
+
+
+handleGuessChar :: Game -> Char -> IO Game
+handleGuessChar game c = do
+  putStrLn $ "You have guessed \"" ++ [c] ++ "\"."
+  case (isHit game c, isAlreadyGussed game c) of
+    (_, True) -> do
+      putStrLn "That character has already been guessed."
+      return game
+    (True, _) -> do
+      putStrLn "Hit!"
+      return (guessChar game c)
+    (False, _) -> do
+      putStrLn "Miss!"
+      return (guessChar game c)
+
+
+
+randomWerd :: IO Werd
+randomWerd = gameWerdList >>= randomItem
+
+
+
+gameWerdList :: IO WerdList
+gameWerdList = do
+  werds <- readWerdList
+  return (filter fitsGame werds)
+  where
+    fitsGame :: Werd -> Bool
+    fitsGame werd = let l = length werd
+                     in l >= gameMinWerdLength &&
+                        l <= gameMaxWerdLength
+
+
+
 
 
 
@@ -46,36 +115,13 @@ stringifyGuesses string = string
 
 
 
+
+
+
 -- Game Logic
 
-freshGame :: Werd -> Game
-freshGame werd = Game werd (fmap (const Nothing) werd) []
-
-
-
-isHit :: Game -> Char -> Bool
-isHit (Game werd _ _) char = char `elem` werd
-
-
-
-isAlreadyGussed :: Game -> Char -> Bool
-isAlreadyGussed (Game _ _ guesses) char = char `elem` guesses
-
-
-
-handleGuessChar :: Game -> Char -> IO Game
-handleGuessChar game c = do
-  putStrLn $ "You have guessed \"" ++ [c] ++ "\"."
-  case (isHit game c, isAlreadyGussed game c) of
-    (_, True) -> do
-      putStrLn "That character has already been guessed."
-      return game
-    (True, _) -> do
-      putStrLn "Hit!"
-      return (guessChar game c)
-    (False, _) -> do
-      putStrLn "Miss. Try again!"
-      return (guessChar game c)
+createGame :: Werd -> Game
+createGame werd = Game werd (fmap (const Nothing) werd) []
 
 
 
@@ -98,22 +144,17 @@ guessChar (Game werd mask guesses) c =
 
 
 
-randomWerd :: IO Werd
-randomWerd = gameWerdList >>= randomItem
+isHit :: Game -> Char -> Bool
+isHit (Game werd _ _) char = char `elem` werd
 
+isAlreadyGussed :: Game -> Char -> Bool
+isAlreadyGussed (Game _ _ guesses) char = char `elem` guesses
 
+isGameLose :: Game -> Bool
+isGameLose (Game _ _ guesses) = length guesses > 7
 
-gameWerdList :: IO WerdList
-gameWerdList = do
-  werds <- readWerdList
-  return (filter fitsGame werds)
-  where
-    fitsGame :: Werd -> Bool
-    fitsGame werd = let l = length werd
-                     in l >= gameMinWerdLength &&
-                        l <= gameMaxWerdLength
-
-
+isGameWin :: Game -> Bool
+isGameWin (Game _ mask _) = all isJust mask
 
 gameMinWerdLength :: Int
 gameMinWerdLength = 5
