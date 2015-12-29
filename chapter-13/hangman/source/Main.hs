@@ -63,6 +63,22 @@ isAlreadyGussed (Game _ _ guesses) char = char `elem` guesses
 
 
 
+handleGuessChar :: Game -> Char -> IO Game
+handleGuessChar game c = do
+  putStrLn $ "You have guessed \"" ++ [c] ++ "\"."
+  case (isHit game c, isAlreadyGussed game c) of
+    (_, True) -> do
+      putStrLn "That character has already been guessed."
+      return game
+    (True, _) -> do
+      putStrLn "Hit!"
+      return (guessChar game c)
+    (False, _) -> do
+      putStrLn "Miss. Try again!"
+      return (guessChar game c)
+
+
+
 guessChar :: Game -> Char -> Game
 guessChar (Game werd mask guesses) c =
   Game werd maskUpdated guessesUpdated
