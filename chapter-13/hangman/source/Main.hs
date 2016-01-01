@@ -151,7 +151,10 @@ isAlreadyGussed :: Game -> Char -> Bool
 isAlreadyGussed (Game _ _ guesses) char = char `elem` guesses
 
 isGameLose :: Game -> Bool
-isGameLose (Game _ _ guesses) = length guesses > 7
+isGameLose (Game werd _ guesses) = length incorrectGuesses > 7
+  where
+    uniqueGuesses = nub guesses
+    incorrectGuesses = uniqueGuesses \\ werd
 
 isGameWin :: Game -> Bool
 isGameWin (Game _ mask _) = all isJust mask
