@@ -1,6 +1,6 @@
 module Main where
 
--- Command Line Interface for interacting with the Caesar Cipher.
+-- Command Line Interface for using the Caesar Cipher function interactively.
 
 import System.Exit (exitSuccess)
 import Caesar
