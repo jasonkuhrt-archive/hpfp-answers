@@ -15,6 +15,10 @@ import Data.Char
 type Key = String
 type StringEncrypted = String
 
+
+
+-- If the key is exhausted then restart from its beginning.
+
 caesarCipher :: Key -> String -> StringEncrypted
 caesarCipher key = zipWith go (cycle key)
   where
