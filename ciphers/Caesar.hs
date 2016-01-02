@@ -16,12 +16,10 @@ type Key = String
 type StringEncrypted = String
 
 caesarCipher :: Key -> String -> StringEncrypted
-caesarCipher key = caesarCipherDo (cycle key)
-
-caesarCipherDo :: Key -> String -> StringEncrypted
-caesarCipherDo _ ""          = ""
-caesarCipherDo ks (' ':xs)   = ' ' : caesarCipherDo ks xs
-caesarCipherDo (k:ks) (x:xs) = encryptChar k x : caesarCipherDo ks xs
+caesarCipher key = zipWith go (cycle key)
+  where
+  go k ' '  = ' '
+  go k s    = encryptChar k s
 
 encryptChar :: Char -> Char -> Char
 encryptChar keyChar char = chars !! index
