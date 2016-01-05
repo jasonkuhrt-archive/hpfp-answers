@@ -26,14 +26,11 @@ type StringEncrypted = String
 
 
 
-caesarCipher :: Key -> String -> StringEncrypted
-caesarCipher key = zipWith go (cycle key)
-  where
-  go :: Char -> Char -> Char
-  go k ' '  = ' '
-  go k s    = encryptChar k s
+encrypt :: Key -> String -> StringEncrypted
+encrypt key = zipWith encryptChar (cycle key)
 
 encryptChar :: Char -> Char -> Char
+encryptChar _ ' ' = ' '
 encryptChar keyChar char = chars !! index
   where
   chars = cycle ['A'..'Z']

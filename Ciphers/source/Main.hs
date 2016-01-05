@@ -2,8 +2,8 @@ module Main where
 
 -- Command Line Interface for using the Caesar Cipher function interactively.
 
+import qualified Caesar
 import System.Exit (exitSuccess)
-import Caesar
 
 
 
@@ -14,7 +14,7 @@ main = do
   putStrLn "==> Please enter text to encrypt."
   string <- getLine
   putStrLn "==> Your encrypted text is:"
-  putStrLn $ caesarCipher secret string
+  putStrLn $ Caesar.encrypt secret string
   putStrLn "==> Would you like to encrypt again? (y/n)"
   string <- getLine
   case string of
