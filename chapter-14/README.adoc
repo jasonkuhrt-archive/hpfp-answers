@@ -1,0 +1,28 @@
+:toc: macro
+:toc-title:
+
+# Chapter 14 – Testing
+
+toc::[]
+
+
+
+## Notes
+
+* Testing Haskell code is necessary because the compiler cannot guarantee that there will not be runtime exceptions. Aside: Other tools like link:https://github.com/ucsd-progsys/liquidhaskell[Liquid Haskell] exist because of this fact, learn more about LH through its link:http://ucsd-progsys.github.io/liquidhaskell-tutorial/[introduction].
+
+* Among several testing libraries two available are `Hspec` and `QuickCheck`.
+
+* Hspec is focused on `Spec Testing` while QuickCheck is focused on `Property Testing`.
+
+* A Spec Test is like a Unit Test test in that it is at the level of individual functions and checks that a function given an input (its argument(s)) produces the expected output. A Spec Test is unlike a Unit Test in that it aims to be readable by programmers/non-programmers alike.
+
+* A Property Test generates random inputs and checks that the outputs satisfy some property or law. To accomplish this check it permits the user to supply a predicate function that encodes the property/law which must hold for the whole gamut of possible inputs.
+
+* The principal authoring difference between a Unit Test and Property Test is that in the former the author _may_ limit their thinking to ad-hoc in/out matches while in the former the author _must_ be more general in their thinking to find a property or law (AKA pattern). Realizing properties about a function is generally favorable to ad-hoc in/out matches because the former can potentially apply to a great number of in/out matches making it easier to reason about in use and in sharing/communicating.
+
+* A limitation of Spec/Unit Testing is that integrations between units are not tested.
+
+* QuickCheck defaults to generating 100 random inputs.
+
+* Not all programs can leverage a Property Test: They must have an "assertable truth-valued" property in the first place.
