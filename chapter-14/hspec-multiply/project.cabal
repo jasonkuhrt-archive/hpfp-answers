@@ -1,0 +1,11 @@
+name: hspec-multiply
+version: 0.1.0.0
+build-type: Simple
+
+library
+  exposed-modules: Main
+  ghc-options: -Wall -fwarn-tabs
+  build-depends:
+    base >= 4.8 && < 4.9,
+    hspec
+  hs-source-dirs: .
