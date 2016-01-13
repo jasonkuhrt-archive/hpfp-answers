@@ -17,7 +17,7 @@ main = hspec $ do
 
 
 
-  describe "Addition" $ do
+  describe "Add" $ do
 
     it "1 + 1 is greater than 1" $
       shouldBe True ((1 + 1 :: Integer) > 1)
