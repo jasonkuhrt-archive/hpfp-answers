@@ -1,5 +1,6 @@
 :toc: macro
 :toc-title:
+:toclevels: 9
 
 # Chapter 14 – Testing
 
@@ -26,3 +27,59 @@ toc::[]
 * QuickCheck defaults to generating 100 random inputs.
 
 * Not all programs can leverage a Property Test: They must have an "assertable truth-valued" property in the first place.
+
+
+
+### QuickCheck
+
+* Initially there are few key parts we play with:
+
+** Three functions: `sample`, `sample'`, `arbitrary`
+
+** One Type Class: `Arbitrary a`
+
+** One Type: `Gen a`
+
+* The `arbitrary` "function" is a actually a value that dispatches based on its type. It does not actually accept any arguments. The signature is `Arbitrary a => Gen a` and can be used like `arbitrary :: Gen String`. This example works because `String` implements the `Arbitrary` Type Class. The type of value itself is a generator. It appears to be an opaque value that is somehow used by e.g. `sample` to produce a random value. It is important to observe that `arbitrary` is _pure_ while `sample` is not. Therefore the randomness itself must not be coming from `arbitrary` but some other source that uses/feeds `arbitrary`. But I don't really understand how yet.
+
+* The `sample` function receives a single argument of type `Gen a` and in turn prints out random data to stdout. Its type is `Show a => Gen a -> IO ()`.
+
+** Given the type of `sample` and `arbitrary` combined `a` must be in two Type Classes: `Show` and `Arbitrary`.
+
+* The `sample'` function is just like `sample` without the `Show` Type Class requirement and returns `IO [a]` instead of `IO ()`.
+
+* The Type `IO` is used by `sample` and `sample'` because of the way it gets random data: an impure process wherein a global resource is accessed. The precise mechanics of this process are not explained by the book at least yet.
+
+* Additional generator functions are introduced:
+
+** `elements` creates a generator that selects one value from a list. Its type is simply `[a] -> Gen a`.
+
+** `choose` creates a generator that selects one value from a tuple. Its type is a bit odd and I do not understand it currently: `random-1.1:System.Random.Random a => (a, a) -> Gen a`.
+
+** `frequency` is like `elements` but the generator created biases selection according to the definition given. The type is `[(Int, Gen a)] -> Gen a`.
+
+* Several pages probe the reader to create her own generators. For example:
++
+```haskell
+genMaybe :: Arbitrary a => Gen (Maybe a)
+genMaybe = do
+  a <- arbitrary
+  frequency [(1, Nothing),
+             (3, Just a)]
+
+```
++
+```haskell
+==> sample (genMaybe :: Gen (Maybe Integer))
+Just 0
+Nothing
+Just 0
+Just 1
+Just (-8)
+Just 10
+Just (-1)
+Nothing
+Nothing
+Nothing
+Just 7
+```
