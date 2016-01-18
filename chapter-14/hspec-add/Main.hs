@@ -1,6 +1,7 @@
 module Main where
 
 import Test.Hspec
+import Test.QuickCheck
 
 
 
@@ -24,6 +25,10 @@ main = hspec $ do
 
     it "2 + 2 is equal to 4" $
       shouldBe 4 ((2 + 2) :: Integer)
+
+    it "x + 1 is always greater than x" $
+      property $ \x -> x + 1 > (x :: Int)
+
 
 
 
