@@ -83,3 +83,69 @@ Nothing
 Nothing
 Just 7
 ```
+
+* Ambiguous types prevent a Haskell program from compiling but in `ghci` there is a feature which causes them to default to unit (`()`). For example:
+
+```
+==> sample arbitrary
+
+<interactive>:4:1: Warning:
+    Defaulting the following constraint(s) to type ‘()’
+      (Show a0) arising from a use of ‘sample’ at <interactive>:4:1-6
+      (Arbitrary a0)
+        arising from a use of ‘arbitrary’ at <interactive>:4:8-16
+    In the first argument of ‘GHC.GHCi.ghciStepIO ::
+                                IO a_a3KL -> IO a_a3KL’, namely
+      ‘sample arbitrary’
+    In a stmt of an interactive GHCi command:
+      it <- GHC.GHCi.ghciStepIO :: IO a_a3KL -> IO a_a3KL
+            (sample arbitrary)
+()
+()
+()
+()
+()
+()
+()
+()
+()
+()
+()
+```
+But if we try to compile `sample arbitrary`:
+
+```
+Main.hs:7:8:
+    No instance for (Show a0) arising from a use of ‘sample’
+    The type variable ‘a0’ is ambiguous
+    Note: there are several potential instances:
+      instance Show HUnit-1.3.0.0:Test.HUnit.Lang.HUnitFailure
+        -- Defined in ‘HUnit-1.3.0.0:Test.HUnit.Lang’
+      instance Show HUnit-1.3.0.0:Test.HUnit.Lang.Location
+        -- Defined in ‘HUnit-1.3.0.0:Test.HUnit.Lang’
+      instance Show HUnit-1.3.0.0:Test.HUnit.Lang.Result
+        -- Defined in ‘HUnit-1.3.0.0:Test.HUnit.Lang’
+      ...plus 57 others
+    In the expression: sample arbitrary
+    In an equation for ‘test’: test = sample arbitrary
+
+Main.hs:7:15:
+    No instance for (Arbitrary a0) arising from a use of ‘arbitrary’
+    The type variable ‘a0’ is ambiguous
+    Note: there are several potential instances:
+      instance [overlap ok] [safe] (RealFloat a, Arbitrary a) =>
+                                   Arbitrary (Data.Complex.Complex a)
+        -- Defined in ‘Test.QuickCheck.Arbitrary’
+      instance [overlap ok] [safe] (Arbitrary a, Arbitrary b) =>
+                                   Arbitrary (Either a b)
+        -- Defined in ‘Test.QuickCheck.Arbitrary’
+      instance [overlap ok] [safe] Data.Fixed.HasResolution a =>
+                                   Arbitrary (Data.Fixed.Fixed a)
+        -- Defined in ‘Test.QuickCheck.Arbitrary’
+      ...plus 26 others
+    In the first argument of ‘sample’, namely ‘arbitrary’
+    In the expression: sample arbitrary
+    In an equation for ‘test’: test = sample arbitrary
+```
+
+** To make GHC act like `ghci` use the flag `-XExtendedDefaultRules`.
