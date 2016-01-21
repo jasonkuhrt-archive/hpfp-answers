@@ -1,0 +1,65 @@
+:macro: toc
+:toc-title:
+
+# Morse Code
+
+
+Phony encryption and decryption of morse code (ish)
+
+toc::[]
+
+
+## Play with it
+
+```
+> cabal repl
+> :browse Morse
+type Morse = String
+charCodeMap :: M.Map Char Morse
+codeCharMap :: M.Map Morse Char
+charToMorse :: Char -> Maybe Morse
+morseToChar :: Morse -> Maybe Char
+stringToMorse :: String -> Maybe [Morse]
+```
+
+## Execute it
+
+#### Via Build
+
+```
+> cabal build
+> echo '.' | dist/build/morse/morse from
+e
+```
+```
+> cabal build
+> echo 'a' | dist/build/morse/morse to
+.-
+```
+
+#### Via Cabal
+
+```
+> echo '.' | cabal run from
+Preprocessing library morse-0.1.0.0...
+In-place registering morse-0.1.0.0...
+Preprocessing executable 'morse' for morse-0.1.0.0...
+Running morse...
+e
+```
+```
+> echo 'a' | cabal run to
+Preprocessing library morse-0.1.0.0...
+In-place registering morse-0.1.0.0...
+Preprocessing executable 'morse' for morse-0.1.0.0...
+Running morse...
+.-
+```
+
+## Test it
+
+```
+> cabal repl tests
+> main
++++ OK, passed 100 tests.
+```
