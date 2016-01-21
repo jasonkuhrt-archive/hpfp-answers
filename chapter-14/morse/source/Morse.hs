@@ -1,7 +1,7 @@
 module Morse (
   Morse,
-  charMorses,
-  morseChars,
+  charCodeMap,
+  codeCharMap,
   charToMorse,
   morseToChar,
   stringToMorse
@@ -17,8 +17,8 @@ type Morse = String
 -- code lookups by character. We will also want the reverse: a map of codes to
 -- characters to do lookups in the opposite direction.
 
-charMorses :: M.Map Char Morse
-charMorses = M.fromList [
+charCodeMap :: M.Map Char Morse
+charCodeMap = M.fromList [
       ('a', ".-")
     , ('b', "-...")
     , ('c', "-.-.")
@@ -57,17 +57,17 @@ charMorses = M.fromList [
     , ('0', "-----")
   ]
 
-morseChars :: M.Map Morse Char
-morseChars = M.foldWithKey (flip M.insert) M.empty charMorses
+codeCharMap :: M.Map Morse Char
+codeCharMap = M.foldWithKey (flip M.insert) M.empty charCodeMap
 
 -- We need some functions that expose convenient lookup operations on our
 -- local map data.
 
 charToMorse :: Char -> Maybe Morse
-charToMorse char = M.lookup char charMorses
+charToMorse char = M.lookup char charCodeMap
 
 morseToChar :: Morse -> Maybe Char
-morseToChar morse = M.lookup morse morseChars
+morseToChar morse = M.lookup morse codeCharMap
 
 stringToMorse :: String -> Maybe [Morse]
 stringToMorse string = sequence $ fmap charToMorse string
