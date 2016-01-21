@@ -9,6 +9,7 @@ import System.Exit (exitFailure, exitSuccess)
 import System.IO (hGetLine, stdin, hIsEOF)
 
 
+
 main :: IO ()
 main = do
   mode <- getArgs
@@ -25,11 +26,10 @@ main = do
       exitFailure
 
 
+
 convertFromMorse :: IO ()
 convertFromMorse = forever $ do
-  weAreDone <- hIsEOF stdin
-  when weAreDone exitSuccess
-
+  tryEnd
   -- Otherwise, proceed.
   line <- hGetLine stdin
   convertLine line
@@ -44,11 +44,11 @@ convertFromMorse = forever $ do
         putStrLn $ "Error: Invalid Morse Code:" ++ line
         exitFailure
 
+
+
 convertToMorse :: IO ()
 convertToMorse = forever $ do
-  weAreDone <- hIsEOF stdin
-  when weAreDone exitSuccess
-
+  tryEnd
   -- Otherwise, proceed.
   line <- hGetLine stdin
   convertLine line
@@ -61,3 +61,10 @@ convertToMorse = forever $ do
         Nothing -> do
           putStrLn $ "Error: Morse code cannot represent this:" ++ line
           exitFailure
+
+
+
+tryEnd :: IO ()
+tryEnd = do
+  isDone <- hIsEOF stdin
+  when isDone exitSuccess
