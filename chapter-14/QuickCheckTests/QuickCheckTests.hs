@@ -9,16 +9,16 @@ main :: IO ()
 main = do
   quickCheck halfAddHalfIdentProp
   quickCheck halfAddHalfIdentityProp
-  quickCheck orderedListProp
+  quickCheck sortOrdersListProp
 
 
 
--- 1 Half
+-- 1 -- half
 
 halfAddHalfIdentProp = forAll generator test
   where
   generator = arbitrary :: Gen Float
-  test n = n == (half n * 2)
+  test n = ((== n) . (* 2) . half) n
 
 halfAddHalfIdentityProp = forAll generator test
   where
@@ -30,14 +30,12 @@ half n = n / 2
 
 
 
--- 2
+-- 2 -- sort
 
--- TODO Manually write orderedList
--- TODO Type-level generator of any type in the Ord typeclass
-orderedListProp = forAll generator test
+sortOrdersListProp = forAll generator test
   where
-  generator = orderedList :: Gen [Float]
-  test = isListOrdered
+  generator = arbitrary :: Gen [Float]
+  test = isListOrdered . sort
 
 isListOrdered :: Ord a => [a] -> Bool
 isListOrdered xs = snd $ foldr go (Nothing, True) xs
