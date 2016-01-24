@@ -10,6 +10,8 @@ main = do
   quickCheck halfAddHalfIdentProp
   quickCheck halfAddHalfIdentityProp
   quickCheck sortOrdersListProp
+  quickCheck plusAssociativeProp
+  quickCheck plusCommutativeProp
 
 
 
@@ -43,3 +45,19 @@ isListOrdered xs = snd $ foldr go (Nothing, True) xs
   go _ status@(_, False)      = status
   go x (Just xPrevious, flag) = (Just x, xPrevious >= x)
   go x (Nothing, flag)        = (Just x, flag) -- first iteration
+
+
+
+-- 3 -- plus
+
+plusAssociativeProp = forAll generator test
+  where
+  generator = arbitrary :: Gen (Integer, Integer, Integer)
+  test (x, y, z) =
+    (==) (x + (y + z)) ((x + y) + z)
+
+plusCommutativeProp = forAll generator test
+  where
+  generator = arbitrary :: Gen (Integer, Integer)
+  test (x, y) =
+    (==) (x + y) (y + x)
