@@ -12,6 +12,8 @@ main = do
   quickCheck sortOrdersListProp
   quickCheck plusAssociativeProp
   quickCheck plusCommutativeProp
+  quickCheck multiplyAssociativeProp
+  quickCheck multiplyCommutativeProp
 
 
 
@@ -61,3 +63,19 @@ plusCommutativeProp = forAll generator test
   generator = arbitrary :: Gen (Float, Float)
   test (x, y) =
     (==) (x + y) (y + x)
+
+
+
+-- 4 -- multiply
+
+multiplyAssociativeProp = forAll generator test
+  where
+  generator = arbitrary :: Gen (Integer, Integer, Integer)
+  test (x, y, z) =
+    (==) (x * (y * z)) ((x * y) * z)
+
+multiplyCommutativeProp = forAll generator test
+  where
+  generator = arbitrary :: Gen (Float, Float)
+  test (x, y) =
+    (==) (x * y) (y * x)
