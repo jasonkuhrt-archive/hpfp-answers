@@ -58,6 +58,6 @@ plusAssociativeProp = forAll generator test
 
 plusCommutativeProp = forAll generator test
   where
-  generator = arbitrary :: Gen (Integer, Integer)
+  generator = arbitrary :: Gen (Float, Float)
   test (x, y) =
     (==) (x + y) (y + x)
