@@ -88,13 +88,13 @@ multiplyCommutativeProp = forAll generator test
 
 quotRemLawProp = forAll generator test
   where
-  generator = suchThat (arbitrary :: Gen (Integer, Integer)) denomNotZero
+  generator = suchThat (arbitrary :: Gen (Integer, Integer)) nonZeroDivisor
   test (x, y) = x == quot x y * y + rem x y
 
 divModLawProp = forAll generator test
   where
-  generator = suchThat (arbitrary :: Gen (Integer, Integer)) denomNotZero
+  generator = suchThat (arbitrary :: Gen (Integer, Integer)) nonZeroDivisor
   test (x, y) = x == div x y * y + mod x y
 
-denomNotZero :: (Integer, Integer) -> Bool
-denomNotZero (_, denom) = denom /= 0
+nonZeroDivisor :: (Integer, Integer) -> Bool
+nonZeroDivisor (_, denom) = denom /= 0
