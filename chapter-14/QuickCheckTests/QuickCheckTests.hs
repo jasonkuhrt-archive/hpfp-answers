@@ -14,6 +14,8 @@ main = do
   quickCheck plusCommutativeProp
   quickCheck multiplyAssociativeProp
   quickCheck multiplyCommutativeProp
+  quickCheck quotRemLawProp
+  quickCheck divModLawProp
 
 
 
@@ -79,3 +81,20 @@ multiplyCommutativeProp = forAll generator test
   generator = arbitrary :: Gen (Float, Float)
   test (x, y) =
     (==) (x * y) (y * x)
+
+
+
+-- 5 -- quot/rem & div/mod laws
+
+quotRemLawProp = forAll generator test
+  where
+  generator = suchThat (arbitrary :: Gen (Integer, Integer)) denomNotZero
+  test (x, y) = x == quot x y * y + rem x y
+
+divModLawProp = forAll generator test
+  where
+  generator = suchThat (arbitrary :: Gen (Integer, Integer)) denomNotZero
+  test (x, y) = x == div x y * y + mod x y
+
+denomNotZero :: (Integer, Integer) -> Bool
+denomNotZero (_, denom) = denom /= 0
