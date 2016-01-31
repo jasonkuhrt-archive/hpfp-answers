@@ -19,6 +19,8 @@ main = do
   quickCheck powAssociativeProp
   quickCheck powCommutativeProp
   quickCheck reverseTwiceIsIdProp
+  quickCheck dollarAppliesProp
+  quickCheck dollarRightAssociativeProp
 
 
 
@@ -137,4 +139,16 @@ reverseTwiceIsIdProp = forAll generator test
 
 
 
--- 8 --
+-- 8 -- Property tests for $
+
+dollarAppliesProp = forAll generator test
+  where
+  generator = arbitrary :: Gen Integer
+  test n = id $ n == id n
+
+dollarRightAssociativeProp = forAll generator test
+  where
+  generator = arbitrary :: Gen [Integer]
+  test xs = ((fmap $ mul $ neg1) $ xs) == ((fmap (mul neg1)) xs)
+  mul = (*)
+  neg1 = (-1)
