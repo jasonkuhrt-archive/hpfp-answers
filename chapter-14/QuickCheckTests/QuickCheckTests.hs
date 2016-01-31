@@ -3,6 +3,12 @@ module QuickCheckTests where
 import Test.QuickCheck
 import Data.List
 
+cons = (:)
+join = (++)
+mul = (*)
+eq = (==)
+neq = (/=)
+
 
 
 main :: IO ()
@@ -16,11 +22,15 @@ main = do
   quickCheck multiplyCommutativeProp
   quickCheck quotRemLawProp
   quickCheck divModLawProp
-  quickCheck powAssociativeProp
-  quickCheck powCommutativeProp
+  -- quickCheck powAssociativeProp -- False property
+  -- quickCheck powCommutativeProp -- False property
   quickCheck reverseTwiceIsIdProp
   quickCheck dollarAppliesProp
   quickCheck dollarRightAssociativeProp
+  -- quickCheck foldrConsEqJoinProp -- False property
+  quickCheck foldrJoinEqConcatProp
+  -- quickCheck takeCountEqLengthProp -- False property
+  quickCheck showReadIdentProp
 
 
 
@@ -29,7 +39,7 @@ main = do
 halfAddHalfIdentProp = forAll generator test
   where
   generator = arbitrary :: Gen Float
-  test n = ((== n) . (* 2) . half) n
+  test n = (eq n . mul 2 . half) n
 
 halfAddHalfIdentityProp = forAll generator test
   where
@@ -79,13 +89,13 @@ multiplyAssociativeProp = forAll generator test
   where
   generator = arbitrary :: Gen (Integer, Integer, Integer)
   test (x, y, z) =
-    (==) (x * (y * z)) ((x * y) * z)
+    (==) (mul x (mul y z)) (mul (mul x y) z)
 
 multiplyCommutativeProp = forAll generator test
   where
   generator = arbitrary :: Gen (Float, Float)
   test (x, y) =
-    (==) (x * y) (y * x)
+    (==) (mul x y) (mul y x)
 
 
 
@@ -99,10 +109,10 @@ quotRemLawProp = forAll generator test
 divModLawProp = forAll generator test
   where
   generator = suchThat (arbitrary :: Gen (Integer, Integer)) nonZeroDivisor
-  test (x, y) = x == div x y * y + mod x y
+  test (x, y) = x == mul (div x y) y + mod x y
 
 nonZeroDivisor :: (Integer, Integer) -> Bool
-nonZeroDivisor (_, denom) = denom /= 0
+nonZeroDivisor (_, denom) = neq denom 0
 
 
 
@@ -150,5 +160,65 @@ dollarRightAssociativeProp = forAll generator test
   where
   generator = arbitrary :: Gen [Integer]
   test xs = ((fmap $ mul $ neg1) $ xs) == ((fmap (mul neg1)) xs)
-  mul = (*)
   neg1 = (-1)
+
+
+
+-- 9a ~ Are these equal? foldr (:) == (++)
+--
+--      No! Its close, but the order does not match up:
+--      (++) ["a"] ["b"]      == ["a","b"]
+--      foldr (:) ["a"] ["b"] == ["b","a"]
+--             ^  ^     ^
+--                acc   [x]
+--             x:acc
+--
+--      In the property test below there are two commented out
+--      variants that _would_ be equal.
+
+
+foldrConsEqJoinProp = forAll generator test
+  where
+  generator = arbitrary :: Gen ([String], [String])
+  test (xs,zs) = foldr cons xs zs == join xs zs
+  -- test (xs,zs) = foldr cons xs zs == (flip join) xs zs
+  -- test (xs,zs) = (flip $ foldr cons) xs zs == join xs zs
+
+
+
+-- 9b ~ Are these equal? foldr (++) [] == concat
+--
+--      Yes! Consider:
+--
+--      concat [[1],[2]]        == [1,2]
+--      foldr join [] [[1],[2]] == [1,2]
+--            ^    ^       ^
+--                 acc     x
+--            x ++ acc
+
+foldrJoinEqConcatProp = forAll generator test
+  where
+  generator = arbitrary :: Gen [[Integer]]
+  test xs = foldr join [] xs == concat xs
+
+
+-- 10 ~ Is this true? f n xs = length (take n xs) == n
+--      No! If xs length is less than n to begin with then this
+--      property does not hold. Consider:
+--
+--      False == (length (take 1 []) == 1)
+
+takeCountEqLengthProp = forAll generator test
+  where
+  generator = suchThat (arbitrary :: Gen (Int, [Integer])) nonZeroCount
+  test (n, xs) = length (take n xs) == n
+  nonZeroCount (n, _) = n >= 0
+
+
+
+-- 11 ~ Test this property: f x = (read (show x)) == x
+
+showReadIdentProp = forAll generator test
+  where
+  generator = arbitrary :: Gen String
+  test x = (read (show x)) == x
