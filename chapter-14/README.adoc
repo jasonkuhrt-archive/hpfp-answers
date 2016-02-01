@@ -56,7 +56,13 @@ toc::[]
 
 ** `choose` creates a generator that selects one value from a tuple. Its type is a bit odd and I do not understand it currently: `random-1.1:System.Random.Random a => (a, a) -> Gen a`.
 
-** `frequency` is like `elements` but the generator created biases selection according to the definition given. The type is `[(Int, Gen a)] -> Gen a`.
+** `frequency` is like `elements` but the generator created biases selection according to the definition given. The type is `[(Int, Gen a)] -> Gen a`. The bias works as a total of the given frequency numbers. For example given:
++
+```haskell
+frequency [(2, pure Foo), (4, pure Bar), (2, pure Qux)]
+```
++
+The probabilities would be: `1/4 Foo | 1/4 Qux | 1/2 Bar`.
 
 * Several pages probe the reader to create her own generators. For example:
 +
