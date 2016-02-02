@@ -6,22 +6,7 @@ import Data.Maybe (isJust)
 import System.Exit (exitSuccess)
 import System.Random (randomRIO)
 import Data.List
-
-
-
--- Type `Word` is already taken so we use the terminology "werd" in place
--- of "word" throughout this program.
-
-type Werd = String
-type WerdList = [Werd]
-
-data Game = Game Werd [Maybe Char] String
-
-instance Show Game where
-  show (Game werd mask guesses) =
-    intersperse ' ' (stringifyMask mask) ++ " | Letters guessed so far: " ++ stringifyGuesses guesses
-
-
+import Hangman
 
 
 
@@ -85,91 +70,6 @@ randomWerd = gameWerdList >>= randomItem
 
 
 
-gameWerdList :: IO WerdList
-gameWerdList = do
-  werds <- readWerdList
-  return (filter fitsGame werds)
-  where
-    fitsGame :: Werd -> Bool
-    fitsGame werd = let l = length werd
-                     in l >= gameMinWerdLength &&
-                        l <= gameMaxWerdLength
-
-
-
-
-
-
--- Game Graphics
-
-stringifyMask :: [Maybe Char] -> String
-stringifyMask = fmap stringifyMaskItem
-
-stringifyMaskItem :: Maybe Char -> Char
-stringifyMaskItem Nothing     = '_'
-stringifyMaskItem (Just char) = char
-
-stringifyGuesses :: String -> String
-stringifyGuesses ""     = "(None)"
-stringifyGuesses string = string
-
-
-
-
-
-
--- Game Logic
-
-createGame :: Werd -> Game
-createGame werd = Game werd (fmap (const Nothing) werd) []
-
-
-
-guessChar :: Game -> Char -> Game
-guessChar (Game werd mask guesses) c =
-  Game werd maskUpdated guessesUpdated
-
-  where
-
-  guessesUpdated =
-    c : guesses
-
-  maskUpdated =
-    zipWith (zipper c) werd mask
-
-  zipper guessedChar werdChar charMask =
-    if guessedChar == werdChar
-    then Just werdChar
-    else charMask
-
-
-
-isHit :: Game -> Char -> Bool
-isHit (Game werd _ _) char = char `elem` werd
-
-isAlreadyGussed :: Game -> Char -> Bool
-isAlreadyGussed (Game _ _ guesses) char = char `elem` guesses
-
-isGameLose :: Game -> Bool
-isGameLose (Game werd _ guesses) = length incorrectGuesses > 7
-  where
-    uniqueGuesses = nub guesses
-    incorrectGuesses = uniqueGuesses \\ werd
-
-isGameWin :: Game -> Bool
-isGameWin (Game _ mask _) = all isJust mask
-
-gameMinWerdLength :: Int
-gameMinWerdLength = 5
-
-gameMaxWerdLength :: Int
-gameMaxWerdLength = 10
-
-
-
-
-
-
 -- Word List Utilities
 
 -- randomWerdFromList :: WerdList -> IO Werd
@@ -201,3 +101,15 @@ randomItem xs = do
 
 randomIndex :: [a] -> IO Int
 randomIndex xs = randomRIO (0, length xs - 1)
+
+
+
+gameWerdList :: IO WerdList
+gameWerdList = do
+  werds <- readWerdList
+  return (filter fitsGame werds)
+  where
+    fitsGame :: Werd -> Bool
+    fitsGame werd = let l = length werd
+                     in l >= gameMinWerdLength &&
+                        l <= gameMaxWerdLength
