@@ -3,6 +3,7 @@ module Main where
 -- Command Line Interface for using the Caesar Cipher function interactively.
 
 import qualified Caesar
+import qualified Vigenere
 import System.Exit (exitSuccess)
 
 
