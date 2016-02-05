@@ -17,7 +17,7 @@ instance Monoid a => Monoid (Optional a) where
 
 
 
--- Tests
+-- Ad-hoc Tests
 
 t1 :: Num a => Optional (Sum a)
 t1 = Only (Sum 1) <> Only (Sum 1)
