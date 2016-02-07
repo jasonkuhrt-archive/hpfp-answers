@@ -142,3 +142,17 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Or a b) where
 
 
 -- 9
+
+newtype Combine a b = Combine { unCombine :: a -> b }
+
+instance (Semigroup b) => Semigroup (Combine a b) where
+  (Combine f1) <> (Combine f2) = Combine (\x -> (f1 x) <> (f2 x))
+
+-- Testing this requires understanding CoArbitrary which I do not understand yet. So, the following is a manual test we can use:
+
+f = Combine (\n -> Sum (n + 1))
+g = Combine (\n -> Sum (n - 1))
+-- 0 == getSum ((unCombine (f <> g)) 0)
+-- 2 == getSum ((unCombine (f <> g)) 1)
+-- 2 == getSum ((unCombine (g <> f)) 1)
+-- 4 == getSum ((unCombine (f <> f)) 1)
