@@ -132,9 +132,9 @@ data Or a b = Fst a | Snd b
   deriving (Eq, Show)
 
 instance Semigroup (Or a b) where
-  x@(Snd _) <> _ = x
-  _ <> x@(Snd _) = x
-  _ <> x = x
+  snd@(Snd _) <> _ = snd
+  _ <> snd@(Snd _) = snd
+  _ <> fst         = fst
 
 instance (Arbitrary a, Arbitrary b) => Arbitrary (Or a b) where
   arbitrary = do
@@ -155,10 +155,10 @@ instance (Semigroup b) => Semigroup (Combine a b) where
 
 f = Combine (\n -> Sum (n + 1))
 g = Combine (\n -> Sum (n - 1))
--- 0 == getSum ((unCombine (f <> g)) 0)
--- 2 == getSum ((unCombine (f <> g)) 1)
--- 2 == getSum ((unCombine (g <> f)) 1)
--- 4 == getSum ((unCombine (f <> f)) 1)
+-- t1 = 0 == getSum (unCombine (f <> g) 0)
+-- t2 = 2 == getSum (unCombine (f <> g) 1)
+-- t3 = 2 == getSum (unCombine (g <> f) 1)
+-- t4 = 4 == getSum (unCombine (f <> f) 1)
 
 
 
