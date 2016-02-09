@@ -1,4 +1,4 @@
-module Instances where
+module Semigroups where
 
 
 import Control.Monad
@@ -6,8 +6,8 @@ import Data.Semigroup
 import Test.QuickCheck
 
 
-main :: IO ()
-main = do
+test :: IO ()
+test = do
   quickCheck (isSemigroupAssoc :: Trivial -> Trivial -> Trivial -> Bool)
   quickCheck (isSemigroupAssoc :: Identity String -> Identity String -> Identity String -> Bool)
   quickCheck (isSemigroupAssoc :: Two String String -> Two String String -> Two String String -> Bool)
