@@ -24,6 +24,17 @@ test = do
   quickBatch $ functor $ (undefined :: Three S S (S,S,S))
   quickBatch $ applicative $ (undefined :: Three S S (S,S,S))
 
+  quickBatch $ monoid $ (undefined :: Three2 S (S,S,S))
+  quickBatch $ functor $ (undefined :: Three2 S (S,S,S))
+  quickBatch $ applicative $ (undefined :: Three2 S (S,S,S))
+
+  quickBatch $ monoid $ (undefined :: Four S S S (S,S,S))
+  quickBatch $ functor $ (undefined :: Four S S S (S,S,S))
+  quickBatch $ applicative $ (undefined :: Four S S S (S,S,S))
+
+
+
+
 
 
 newtype Identity a = Identity a
@@ -41,6 +52,9 @@ instance (Arbitrary a) => Arbitrary (Identity a) where
 
 instance (Eq a) => EqProp (Identity a) where
   (=-=) = eq
+
+
+
 
 
 
@@ -62,6 +76,9 @@ instance (Arbitrary a) => Arbitrary (Pair a) where
 
 instance (Eq a) => EqProp (Pair a) where
   (=-=) = eq
+
+
+
 
 
 
@@ -91,6 +108,9 @@ instance (Eq a, Eq b) => EqProp (Two a b) where
 
 
 
+
+
+
 data Three a b c = Three a b c
   deriving (Eq, Show)
 
@@ -113,4 +133,63 @@ instance (Arbitrary a, Arbitrary b, Arbitrary c) => Arbitrary (Three a b c) wher
     pure $ Three v x z
 
 instance (Eq a, Eq b, Eq c) => EqProp (Three a b c) where
+  (=-=) = eq
+
+
+
+
+
+
+data Three2 a b = Three2 a b b
+  deriving (Eq, Show)
+
+instance Functor (Three2 a) where
+  fmap f (Three2 v x z) = Three2 v (f x) (f z)
+
+instance (Monoid a, Monoid b) => Monoid (Three2 a b) where
+  mempty = Three2 mempty mempty mempty
+  mappend (Three2 v x z) (Three2 v' x' z') = Three2 (mappend v v') (mappend x x') (mappend z z')
+
+instance (Monoid a) => Applicative (Three2 a) where
+  pure x = Three2 mempty x x
+  (<*>) (Three2 v f g) (Three2 v' x z) = Three2 (mappend v v') (f x) (g z)
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Three2 a b) where
+  arbitrary = do
+    v <- arbitrary
+    x <- arbitrary
+    z <- arbitrary
+    pure $ Three2 v x z
+
+instance (Eq a, Eq b) => EqProp (Three2 a b) where
+  (=-=) = eq
+
+
+
+
+
+
+data Four a b c d = Four a b c d
+  deriving (Eq, Show)
+
+instance Functor (Four a b c) where
+  fmap f (Four z x v o) = Four z x v (f o)
+
+instance (Monoid a, Monoid b, Monoid c, Monoid d) => Monoid (Four a b c d) where
+  mempty = Four mempty mempty mempty mempty
+  mappend (Four o v x z) (Four o' v' x' z') = Four (mappend o o') (mappend v v') (mappend x x') (mappend z z')
+
+instance (Monoid a, Monoid b, Monoid c) => Applicative (Four a b c) where
+  pure x = Four mempty mempty mempty x
+  (<*>) (Four o v x f) (Four o' v' x' z) = Four (mappend o o') (mappend v v') (mappend x x') (f z)
+
+instance (Arbitrary a, Arbitrary b, Arbitrary c, Arbitrary d) => Arbitrary (Four a b c d) where
+  arbitrary = do
+    o <- arbitrary
+    v <- arbitrary
+    x <- arbitrary
+    z <- arbitrary
+    pure $ Four o v x z
+
+instance (Eq a, Eq b, Eq c, Eq d) => EqProp (Four a b c d) where
   (=-=) = eq
