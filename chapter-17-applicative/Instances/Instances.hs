@@ -32,6 +32,10 @@ test = do
   quickBatch $ functor $ (undefined :: Four S S S (S,S,S))
   quickBatch $ applicative $ (undefined :: Four S S S (S,S,S))
 
+  quickBatch $ monoid $ (undefined :: Four1 S (S,S,S))
+  quickBatch $ functor $ (undefined :: Four1 S (S,S,S))
+  quickBatch $ applicative $ (undefined :: Four1 S (S,S,S))
+
 
 
 
@@ -192,4 +196,34 @@ instance (Arbitrary a, Arbitrary b, Arbitrary c, Arbitrary d) => Arbitrary (Four
     pure $ Four o v x z
 
 instance (Eq a, Eq b, Eq c, Eq d) => EqProp (Four a b c d) where
+  (=-=) = eq
+
+
+
+
+
+
+data Four1 a b = Four1 a a a b
+  deriving (Eq, Show)
+
+instance Functor (Four1 a) where
+  fmap f (Four1 z x v o) = Four1 z x v (f o)
+
+instance (Monoid a, Monoid b) => Monoid (Four1 a b) where
+  mempty = Four1 mempty mempty mempty mempty
+  mappend (Four1 o v x z) (Four1 o' v' x' z') = Four1 (mappend o o') (mappend v v') (mappend x x') (mappend z z')
+
+instance (Monoid a) => Applicative (Four1 a) where
+  pure x = Four1 mempty mempty mempty x
+  (<*>) (Four1 o v x f) (Four1 o' v' x' z) = Four1 (mappend o o') (mappend v v') (mappend x x') (f z)
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Four1 a b) where
+  arbitrary = do
+    o <- arbitrary
+    v <- arbitrary
+    x <- arbitrary
+    z <- arbitrary
+    pure $ Four1 o v x z
+
+instance (Eq a, Eq b) => EqProp (Four1 a b) where
   (=-=) = eq
