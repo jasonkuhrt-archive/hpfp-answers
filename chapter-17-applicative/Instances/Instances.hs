@@ -5,7 +5,9 @@ import Test.QuickCheck.Classes
 import Test.QuickCheck.Checkers
 
 
+
 type S = String
+
 test :: IO ()
 test = do
   quickBatch $ functor $ Identity ("","","")
@@ -13,6 +15,9 @@ test = do
 
   quickBatch $ functor $ (undefined :: Pair (S,S,S))
   quickBatch $ applicative $ (undefined :: Pair (S,S,S))
+
+  quickBatch $ functor $ (undefined :: Two S (S,S,S))
+  quickBatch $ applicative $ (undefined :: Two S (S,S,S))
 
 
 
@@ -51,4 +56,30 @@ instance (Arbitrary a) => Arbitrary (Pair a) where
     pure $ Pair x z
 
 instance (Eq a) => EqProp (Pair a) where
+  (=-=) = eq
+
+
+
+
+data Two a b = Two a b
+  deriving (Eq, Show)
+
+instance (Monoid a, Monoid b) => Monoid (Two a b) where
+  mempty = Two mempty mempty
+  mappend (Two u s) (Two x z) = Two (mappend u x) (mappend s z)
+
+instance Functor (Two a) where
+  fmap f (Two x z) = Two x (f z)
+
+instance (Monoid a) => Applicative (Two a) where
+  pure x = Two mempty x
+  (<*>) (Two u f) (Two x z) = Two (mappend u x) (f z)
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Two a b) where
+  arbitrary = do
+    x <- arbitrary
+    z <- arbitrary
+    pure $ Two x z
+
+instance (Eq a, Eq b) => EqProp (Two a b) where
   (=-=) = eq
