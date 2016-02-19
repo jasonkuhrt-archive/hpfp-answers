@@ -32,7 +32,6 @@ instance Applicative (EitherOr a) where
   (<*>) (Second f) (Second z) = Second (f z)
 
 instance Monad (EitherOr a) where
-  return = Second
   (>>=) (First z) _ = First z
   (>>=) (Second z) f = f z
 
