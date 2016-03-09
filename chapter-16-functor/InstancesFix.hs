@@ -4,34 +4,34 @@ module InstancesFix where
 
 -- 1
 data Sum a b =
-    First a
-  | Second b
+    First b
+  | Second a
   deriving (Eq, Show)
 
 instance Functor (Sum a) where
-  fmap _ (First a)  = First a
-  fmap f (Second b) = Second (f b)
+  fmap f (First a)  = First (f a)
+  fmap _ (Second b) = Second b
 
 
 
 -- 2
 data Company a b c =
-    DeepBlue a c
-  | Something b
+    DeepBlue a b
+  | Something c
   deriving (Eq, Show)
 
 instance Functor (Company a b) where
-  fmap f (DeepBlue a c) = DeepBlue a (f c)
-  fmap _ (Something b) = Something b
+  fmap f (Something b) = Something (f b)
+  fmap _ (DeepBlue a c) = DeepBlue a c
 
 
 
 -- 3
 data More a b =
-    L a b a
-  | R b a b
+    L b a b
+  | R a b a
   deriving (Eq, Show)
 
 instance Functor (More a) where
-  fmap f (L a b c) = L a (f b) c
-  fmap f (R a b c) = R (f a) b (f c)
+  fmap f (L a b c) = L (f a) b (f c)
+  fmap f (R a b c) = R a (f b) c
