@@ -41,31 +41,40 @@ instance Applicative (Reader r) where
 
 
 -- 4 Rewrite the Dog/Person example using Reader
+-- TODO Use Reader as per the goal of this exercise question.
 
-newtype DogName = DogName String deriving (Show)
-newtype HumanName = HumanName String deriving (Show)
-newtype Address = Address String deriving (Show)
+newtype DogName = DogName String deriving (Show, Eq)
+newtype HumanName = HumanName String deriving (Show, Eq)
+newtype Address = Address String deriving (Show, Eq)
 
 data Person =
   Person {
     humanName :: HumanName,
     address :: Address,
     dogName :: DogName
-  } deriving (Show)
+  } deriving (Show, Eq)
 
 data Dog =
   Dog {
     dogsName :: DogName,
     dogsAddress :: Address
-  } deriving (Show)
+  } deriving (Show, Eq)
+
+person :: Person
+person = Person
+  (HumanName "Jason") (Address "5624 Hutchison") (DogName "Woofie")
 
 getDog :: Person -> Dog
 getDog = Dog <$> dogName <*> address
 
-test4 :: Dog
-test4 = getDog person
-  where
-  person = Person
-    (HumanName "Jason")
-    (Address "5624 Hutchison")
-    (DogName "Woofie")
+test4a :: Dog
+test4a = getDog person
+
+getDogReader :: Reader Person Dog
+getDogReader = Dog <$> Reader dogName <*> Reader address
+
+test4b :: Dog
+test4b = runReader getDogReader person
+
+test4c :: Bool
+test4c = test4a == test4b
