@@ -41,7 +41,6 @@ instance Applicative (Reader r) where
 
 
 -- 4 Rewrite the Dog/Person example using Reader
--- TODO Use Reader as per the goal of this exercise question.
 
 newtype DogName = DogName String deriving (Show, Eq)
 newtype HumanName = HumanName String deriving (Show, Eq)
