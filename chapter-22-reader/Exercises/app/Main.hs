@@ -7,7 +7,8 @@ import qualified Control.Applicative as A
 
 
 main :: IO ()
-main = undefined
+main = do
+
   -- Examples:
   -- print $ sequenceA [Just 3, Just 2, Just 1]
   -- print $ sequenceA [x, y]
@@ -17,6 +18,22 @@ main = undefined
   -- print $ bolt 7
   -- print $ fmap bolt z
   -- print $ sequenceA [(>3), (<8), even] 7
+
+  -- 1. fold the boolean conjunction operator over the list of results of sequA (applied to some value).
+
+  print $ foldr (&&) False $ sequA 1
+
+  -- 2. apply sequA to s'; you’ll need fromMaybe.
+
+  print $ sequA . Maybe.fromMaybe 0 $ s'
+
+  -- 3. apply bolt to ys; you’ll need fromMaybe.
+
+  print $ bolt . Maybe.fromMaybe 0 $ ys
+
+  -- 4. apply bolt to z'.
+
+  print $ bolt . Maybe.fromMaybe 0 . z' $ 1
 
 
 
