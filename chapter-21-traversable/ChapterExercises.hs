@@ -115,3 +115,40 @@ instance Traversable n => Traversable (S n) where
   traverse :: Applicative a => (x -> a z) -> S n x -> a (S n z)
   -- fmap (x -> a z) (n x) :: n (a z) |> sequenceA :: a (n z)
   traverse f (S nx x) = S <$> (sequenceA . fmap f $ nx) <*> f x
+
+
+
+-- 2 Implement typeclasses for type Tree
+
+data Tree a =
+  Node (Tree a) a (Tree a) |
+  Leaf a                   |
+  End
+  deriving (Show, Eq)
+
+instance Functor Tree where
+  fmap :: (x -> z) -> Tree x -> Tree z
+  fmap _ End =
+    End
+  fmap f (Leaf x) =
+    Leaf (f x)
+  fmap f (Node treeLeft x treeRight) =
+    Node (fmap f treeLeft) (f x) (fmap f treeRight)
+instance Foldable Tree where
+  foldMap :: Monoid m => (x -> m) -> Tree x -> m
+  foldMap _ End =
+    mempty
+  foldMap f (Leaf x) =
+    f x
+  foldMap f (Node treeLeft x treeRight) =
+    mappend (mappend (foldMap f treeLeft) (f x)) (foldMap f treeRight)
+instance Traversable Tree where
+  traverse :: Applicative a => (x -> a z) -> Tree x -> a (Tree z)
+  traverse _ End =
+    pure End
+  traverse f (Leaf x) =
+    fmap Leaf (f x)
+  traverse f (Node treeLeft x treeRight) =
+    Node <$> traverse f treeLeft
+         <*> f x
+         <*> traverse f treeRight
