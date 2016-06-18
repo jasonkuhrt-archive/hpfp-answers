@@ -36,3 +36,22 @@ randomElement xs = do
 
 genShortLink :: IO String
 genShortLink = replicateM 7 (randomElement charPool)
+
+-- Next we need to persistently store shortLinks and the URIs they point to. We can model this by treating shortLinks as keys and the URI they point to as the key's value. Other data at play will be a connection to Redis, and a result of storing a shortLink (which lets us know if there was an error, otherwise the status after finishing the command).
+
+saveURI :: R.Connection
+        -> BC.ByteString
+        -> BC.ByteString
+        -> IO (Either R.Reply R.Status)
+saveURI conn shortLink uri = R.runRedis conn (R.set shortLink uri)
+
+-- Next we need a way to get at a URI via its shortLink.
+
+getURI :: R.Connection
+       -> BC.ByteString
+       -> IO (Either R.Reply (Maybe BC.ByteString))
+getURI conn shortLink = R.runRedis conn (R.get shortLink)
+
+-- Next, we want any human to be easily able use this service. We'll need a graphical interface. We can create some simple view functions that return HTML templates which a browser can redner.
+
+-- TODO
