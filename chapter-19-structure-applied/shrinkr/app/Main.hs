@@ -15,9 +15,6 @@ import Data.Monoid ((<>))
 
 
 
-main :: IO ()
-main = genShortLink >>= print
-
 -- We need to generate our shortened URIs that refer to the links people post to this service. In order to rename, we need a character pool to select from:
 
 charPool :: String
@@ -42,8 +39,13 @@ genShortLink = replicateM 7 (randomElement charPool)
 saveURI :: R.Connection
         -> BC.ByteString
         -> BC.ByteString
-        -> IO (Either R.Reply R.Status)
-saveURI conn shortLink uri = R.runRedis conn (R.set shortLink uri)
+        -> IO (Either R.Reply Bool)
+saveURI conn shortLink uri = do
+  result <- R.runRedis conn (R.setnx shortLink uri)
+  case result of
+    -- Redis setnx semantics are that if the key already exists its value is not overwritten. We want these semantics because users should not be overwritting their own or others' shortLinks. A conflict is modelled here via False which states that while there was no unexpected error in trying to execute the command the key did exist and so no value was written. When this happens we should just try again. One conflict is already astronomically unlikely to happen, an loop/infinite loop of conflicts is infinitely more so, so this is a safe strategy I think! And we avoid doubling the cost of every request with a Redis `exists` check.
+    Right False -> saveURI conn shortLink uri
+    value -> return value
 
 -- Next we need a way to get at a URI via its shortLink.
 
@@ -52,6 +54,42 @@ getURI :: R.Connection
        -> IO (Either R.Reply (Maybe BC.ByteString))
 getURI conn shortLink = R.runRedis conn (R.get shortLink)
 
--- Next, we want any human to be easily able use this service. We'll need a graphical interface. We can create some simple view functions that return HTML templates which a browser can redner.
+-- Next are the web-service parts.
 
--- TODO
+app :: R.Connection -> ScottyM ()
+app redisConn = do
+  get "/" $ do
+    uri <- param "uri"
+    let parsedURI :: Maybe URI
+        parsedURI = parseURI (TL.unpack uri)
+    case parsedURI of
+      Nothing ->
+        text (uri <> " is an invalid URI.")
+      Just _  -> do
+        shortLink <- liftIO genShortLink
+        let shortLink' = BC.pack shortLink
+            uri' = encodeUtf8 (TL.toStrict uri)
+        response <- liftIO (saveURI redisConn shortLink' uri')
+        text . TL.pack $ shortLink
+  get "/:shortLink" $ do
+    shortLink <- param "shortLink"
+    uri <- liftIO (getURI redisConn shortLink)
+    case uri of
+      Left reply     ->
+        text . TL.pack . show $ reply
+      Right maybeURI ->
+        case maybeURI of
+          Nothing         ->
+            text "URI not found"
+          Just byteString ->
+              text
+            . TL.fromStrict
+            . decodeUtf8
+            $ byteString
+
+-- Next we need an entry point into this application. This is what happens once upon boot.
+
+main :: IO ()
+main = do
+  redisConnection <- R.connect R.defaultConnectInfo
+  scotty 3000 (app redisConnection)
