@@ -23,11 +23,11 @@ charPool = ['A'..'Z'] <> ['0'..'9']
 -- Now we need to pick random elements from the pool. We will need to be impure to achieve randomness:
 
 randomElement :: String -> IO Char
-randomElement xs = do
-  let indexRange :: (Int, Int)
-      indexRange = (0, length xs - 1)
-  randomDigit <- SR.randomRIO indexRange
-  return (xs !! randomDigit)
+randomElement xs = fmap (xs !!) randomIndex
+  where
+  randomIndex = SR.randomRIO indexRange
+  indexRange :: (Int, Int)
+  indexRange = (0, length xs - 1)
 
 -- Next we apply randomElement to our char pool. By repeating this seven times we can make strings of seven random characters.
 
